@@ -164,3 +164,32 @@ class Singularity:
             date = date + relativedelta(months=6)   # 6개월 경과
         
         return self.rate_sum
+    
+    # 거시변수 월 데이터 뽑기
+    def get_month_data(self, df, col_name, set_col_name):
+
+        date = datetime.strptime('2007-07-01', '%Y-%m-%d') 
+        date_list = []
+        for i in range(191):
+            date_list.append(date)
+            date = date+relativedelta(months=1)
+
+        year = 2007
+        mon = 7
+        value_list = []
+        for i in range(191):
+            temp = df[(df.index.month == mon)& (df.index.year == year)][col_name]
+            temp_avg = temp.values.sum()/len(temp)
+            value_list.append(temp_avg)
+
+            if mon == 12:
+                year = year + 1
+                mon = mon - 12
+            
+            mon = mon + 1
+        
+        df_selected = pd.DataFrame({
+            set_col_name : value_list,
+        }, index=date_list)  # 시계열 데이터를 인덱스로 설정
+
+        return df_selected
