@@ -177,7 +177,7 @@ class Singularity:
         year = 2007
         mon = 7
         value_list = []
-        for i in range(191):
+        for j in range(191):
             temp = df[(df.index.month == mon)& (df.index.year == year)][col_name]
             temp_avg = temp.values.sum()/len(temp)
             value_list.append(temp_avg)
