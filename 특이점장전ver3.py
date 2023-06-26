@@ -13,36 +13,6 @@ class Singularity:
         self.date_list = _date_list
         self.col_list = _col_list
 
-    # 2007/6부터 2022/12까지 날짜 정보를 리스트의 형태로 뽑아오는 함수
-    def getdate(self):
-        self.date_list = []
-        i = 7
-        j = 6
-        for p in range(32):
-            if (i < 10) & (j < 12):
-                temp = '200'+str(i) +'/0'+str(j)
-                self.date_list.append(temp)
-                j = j + 6
-
-            elif (i < 10) & (j >= 12):
-                temp = '200'+str(i) +'/'+str(j)
-                self.date_list.append(temp)
-                j = j - 6
-                i = i + 1
-
-            elif (i >= 10) & (j < 12):
-                temp = '20'+str(i) +'/0'+str(j)
-                self.date_list.append(temp)
-                j = j + 6   
-
-            else:
-                temp = '20'+str(i) +'/'+str(j)
-                self.date_list.append(temp)
-                j = j - 6
-                i = i + 1    
-        return self.date_list
-    
-
 
     ## Kospi200 종목의 월별 개별 팩터데이터를 데이터 프레임의 형태로 받아오자
     def get_month_df(self, df, file_list):
@@ -113,29 +83,46 @@ class Singularity:
     # 을 기준으로 long position, short position을 가지는 데이터들을 리스트에 형태로 저장해두었다.
     # self.long_list는 2007/06~2022/12에서의 col_list에 나온 각각의 기준별로 long position을 취할 종목들의 코드를 담았다.
     # self.short_list는 2007/06~2022/12에서의 col_list에 나온 각각의 기준별로 short position을 취할 종목들의 코드를 담았다.
-    def long_short(self):
+    def long_short(self, date_list, file_list, dataframes):
         self.long_list = []
         self.short_list = []
+        col_list = dataframes[0].columns
 
-        for i in self.date_list:
+        for i in date_list:
 
-            df_temp = self.df.loc[self.df['회계년도']==i]    
-            num = len(df_temp['거래소코드'])
-            long_num = int(num/5)
-            short_num = int(num/5)
+            for k, col in enumerate(col_list):
 
-            for j in self.col_list:
+                temp_list = []
+                long_ll = []
+                short_ll = []
+                for j in range(len(dataframes)):
+                    temp = dataframes[j][col][i]
+                    temp_list.append(temp)
+                
+                temp_df = pd.DataFrame(temp_list)
 
-                long_index = df_temp[j].sort_values(ascending=False)[0:long_num].index
-                short_index = df_temp[j].sort_values(ascending=True)[0:short_num].index
+                num = int(len(temp_df.dropna())/5)
 
-                long_temp_list = list(df_temp['거래소코드'][long_index])
-                short_temp_list = list(df_temp['거래소코드'][short_index])
+                long_index = temp_df[0].sort_values(ascending=False)[0:num].index
+                short_index = temp_df[0].sort_values(ascending=True)[0:num].index
 
-                self.long_list.append(long_temp_list)
-                self.short_list.append(short_temp_list)  
+                # temp_list = df_temp[j].sort_values(ascending=True)[0:short_num].index
+
+                for idx in long_index:
+                    long_ll.append(file_list[idx].replace('.xlsx',''))
+
+                for idx in short_index:
+                    short_ll.append(file_list[idx].replace('.xlsx',''))
+            
+                self.long_list.append(long_ll)
+                self.short_list.append(short_ll)
 
         return self.long_list, self.short_list
+    
+
+
+
+
     
     def get_posterior_rate(self, long_li, short_li):
 
