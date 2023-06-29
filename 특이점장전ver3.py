@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 class Singularity:
 
     # 생성자 함수
-    def __init__(self, _file_list, _date_list):
+    def __init__(self, _file_list=None, _date_list=None):
         self.file_list = _file_list
         self.date_list = _date_list
         # (self, _file_list, _df=None, _date_list=None, _col_list=None)
@@ -60,7 +60,8 @@ class Singularity:
 
             df_code = df.loc[df['거래소코드']== flie.replace('.xlsx','')]
             df_code = df_code.reindex(date_list2)
-            df_code.drop(['회사명', '거래소코드', 'PER', 'PBR', 'PCR'], axis=1, inplace=True)
+            df_code.drop(['회사명', '거래소코드'], axis=1, inplace=True)
+            # df_code.drop(['회사명', '거래소코드', 'PER', 'PBR', 'PCR'], axis=1, inplace=True)
 
             df_new2 = pd.concat([df_new, df_code], axis=1)
             df_new2 = df_new2.replace(0, np.nan)
@@ -215,8 +216,13 @@ class Singularity:
         value_list = []
         for j in range(191):
             temp = df[(df.index.month == mon)& (df.index.year == year)][col_name]
-            temp_avg = temp.values.sum()/len(temp)
+
+            temp_nan_num = temp.isna().sum()
+            temp = temp.fillna(0)
+
+            temp_avg = temp.values.sum()/(len(temp) - temp_nan_num)    #-temp_nan_num
             value_list.append(temp_avg)
+
 
             if mon == 12:
                 year = year + 1
@@ -227,5 +233,6 @@ class Singularity:
         df_selected = pd.DataFrame({
             set_col_name : value_list,
         }, index=date_list2)  # 시계열 데이터를 인덱스로 설정
+
 
         return df_selected
