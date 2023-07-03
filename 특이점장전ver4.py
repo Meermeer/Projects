@@ -109,9 +109,10 @@ class Singularity:
                 temp_df = pd.DataFrame(temp_list)
 
                 num = int(len(temp_df.dropna())/5)
+                num2 = int(len(temp_df.dropna())/5)
 
                 long_index = temp_df[0].sort_values(ascending=False)[0:num].index
-                short_index = temp_df[0].sort_values(ascending=True)[0:num].index
+                short_index = temp_df[0].sort_values(ascending=True)[0:num2].index
 
                 # temp_list = df_temp[j].sort_values(ascending=True)[0:short_num].index
 
@@ -138,33 +139,67 @@ class Singularity:
 
         long_rate_sum = []
         for i in range(len(long_li)):
-            
+            # print(f'{i}번째 기간 읽어오기 완료')  
             date = self.date_list[i]
             # 특정 기간에서 특정 팩터 기준으로 long칠 종목들
             long_tem = long_li[i]
 
             len_code = len(long_tem)
+            len_code2 = len(long_tem)
+            len_code3 = len(long_tem)
 
             # long_temp = []  ##
             # 상위 20% 데이터 롱치자
             long_temp_rate = 0
+            long_temp_rate2 = 0
+            long_temp_rate3 = 0
             for code_tem in long_tem:
 
                 ind = self.file_list.index(code_tem+'.xlsx')
-                temp = dfs[ind][((dfs[ind].index.month == date.month)|(dfs[ind].index.month == date.month-1)|(dfs[ind].index.month == date.month-2))& (dfs[ind].index.year == date.year)]['종가(원)']
+                temp = dfs[ind][((dfs[ind].index.month == date.month))& (dfs[ind].index.year == date.year)]['종가(원)']
+                temp2 = dfs[ind][((dfs[ind].index.month == date.month-1))& (dfs[ind].index.year == date.year)]['종가(원)']
+                temp3 = dfs[ind][((dfs[ind].index.month == date.month-2))& (dfs[ind].index.year == date.year)]['종가(원)']
+                # |(dfs[ind].index.month == date.month-1)|(dfs[ind].index.month == date.month-2)
 
                 if temp.empty != True:
                     long_temp_rate = long_temp_rate + (temp[-1] - temp[0])/temp[0]
                     # long_temp.append(long_temp_rate)    ##
                 else:
                     len_code = len_code -1 
+
+                if temp2.empty != True:
+                    long_temp_rate2 = long_temp_rate2 + (temp2[-1] - temp2[0])/temp2[0]
+                    # long_temp.append(long_temp_rate)    ##
+                else:
+                    len_code2 = len_code2 -1 
+
+                if temp3.empty != True:
+                    long_temp_rate3 = long_temp_rate3 + (temp3[-1] - temp3[0])/temp3[0]
+                    # long_temp.append(long_temp_rate)    ##
+                else:
+                    len_code3 = len_code3 -1 
             
             if len_code == 0:
                 long_temp_rate = 0
             else:
                 long_temp_rate = long_temp_rate/len_code
+            
+            if len_code2 == 0:
+                long_temp_rate2 = 0
+            else:
+                long_temp_rate2 = long_temp_rate2/len_code2
+            
+            if len_code3 == 0:
+                long_temp_rate3 = 0
+            else:
+                long_temp_rate3 = long_temp_rate3/len_code3
 
+            long_rate_sum.append(long_temp_rate3)
+            print(f'{i}번째 기간 읽어오기 완료')      
+            long_rate_sum.append(long_temp_rate2)
+            print(f'{i}번째 기간 읽어오기 완료')      
             long_rate_sum.append(long_temp_rate)
+            print(f'{i}번째 기간 읽어오기 완료')      
             # print(f'{i}번째 기간 읽어오기 완료')           
 
         short_rate_sum = []
@@ -175,27 +210,57 @@ class Singularity:
             short_tem = short_li[i]
 
             len_code = len(short_tem)
+            len_code2 = len(short_tem)
+            len_code3 = len(short_tem)
 
             short_temp_rate = 0
+            short_temp_rate2 = 0
+            short_temp_rate3 = 0
             # 상위 20% 데이터 롱치자
             for code_tem in short_tem:
 
                 ind = self.file_list.index(code_tem+'.xlsx')
-                temp = dfs[ind][((dfs[ind].index.month == date.month)|(dfs[ind].index.month == date.month-1)|(dfs[ind].index.month == date.month-2))& (dfs[ind].index.year == date.year)]['종가(원)']
+                temp = dfs[ind][((dfs[ind].index.month == date.month))& (dfs[ind].index.year == date.year)]['종가(원)']
+                temp2 = dfs[ind][((dfs[ind].index.month == date.month-1))& (dfs[ind].index.year == date.year)]['종가(원)']
+                temp3 = dfs[ind][((dfs[ind].index.month == date.month-2))& (dfs[ind].index.year == date.year)]['종가(원)']
 
                 if temp.empty != True:
                     short_temp_rate = short_temp_rate + (temp[0] - temp[-1])/temp[0]
                     # long_temp.append(long_temp_rate)    ##
                 else:
                     len_code = len_code -1 
+
+                if temp2.empty != True:
+                    short_temp_rate2 = short_temp_rate2 + (temp2[0] - temp2[-1])/temp2[0]
+                    # long_temp.append(long_temp_rate)    ##
+                else:
+                    len_code2 = len_code2 -1 
+
+                if temp3.empty != True:
+                    short_temp_rate3 = short_temp_rate3 + (temp3[0] - temp3[-1])/temp3[0]
+                    # long_temp.append(long_temp_rate)    ##
+                else:
+                    len_code3 = len_code3 -1 
             
             if len_code == 0:
                 short_temp_rate = 0
             else:
                 short_temp_rate = short_temp_rate/len_code
 
+            if len_code2 == 0:
+                short_temp_rate2 = 0
+            else:
+                short_temp_rate2 = short_temp_rate2/len_code2
             
+            if len_code3 == 0:
+                short_temp_rate3 = 0
+            else:
+                short_temp_rate3 = short_temp_rate3/len_code3
+
+            short_rate_sum.append(short_temp_rate3)
+            short_rate_sum.append(short_temp_rate2)
             short_rate_sum.append(short_temp_rate)
+         
 
 
         # self.rate_sum = [a + b for a, b in zip(long_rate_sum, short_rate_sum)]
